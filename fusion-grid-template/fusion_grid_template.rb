@@ -1,6 +1,6 @@
 # Fusion-inspired grid workspace template helper for SketchUp 2017.
 # Adds a dark modeling style and a locked, edge-only reference grid to a blank model.
-# Version 1.0.8
+# Version 1.0.9
 
 require 'sketchup.rb'
 
@@ -103,6 +103,19 @@ module N0JCG
       UI.messagebox("Could not zoom to drawing objects:\n#{error.message}")
     end
 
+    def self.create_toolbar
+      icon_path = File.join(File.dirname(__FILE__), 'fusion_grid_zoom.svg')
+      command = UI::Command.new('Zoom to Drawing') { zoom_to_drawing }
+      command.tooltip = 'Zoom Extents to Drawing (Ignore Fusion Grid)'
+      command.status_bar_text = 'Frame visible model objects without including the Fusion Workplane Grid.'
+      command.small_icon = icon_path
+      command.large_icon = icon_path
+
+      @toolbar = UI::Toolbar.new('Fusion Grid')
+      @toolbar.add_item(command)
+      @toolbar.show
+    end
+
     def self.add_grid(model)
       model.entities.to_a.each do |entity|
         next unless workspace_grid?(entity)
@@ -173,6 +186,7 @@ module N0JCG
       UI.menu('Tools').add_item('Apply Fusion Grid Appearance') { apply_grid_appearance }
       UI.menu('Edit').add_item('Select All Except Fusion Grid') { select_all_except_grid }
       UI.menu('Camera').add_item('Zoom Extents to Drawing (Ignore Fusion Grid)') { zoom_to_drawing }
+      create_toolbar
       file_loaded(__FILE__)
     end
   end
