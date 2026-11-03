@@ -1,6 +1,6 @@
 # Fusion-inspired grid workspace template helper for SketchUp 2017.
 # Adds a dark modeling style and a locked, edge-only reference grid to a blank model.
-# Version 1.0.7
+# Version 1.0.8
 
 require 'sketchup.rb'
 
@@ -81,6 +81,28 @@ module N0JCG
       UI.messagebox("Could not select model geometry:\n#{error.message}")
     end
 
+    def self.zoom_to_drawing
+      model = Sketchup.active_model
+      drawing_entities = model.entities.to_a.select do |entity|
+        next false if workspace_grid?(entity) || reference_entity?(entity)
+        next false unless entity.respond_to?(:visible?) && entity.visible?
+        next false if entity.respond_to?(:layer) && entity.layer && !entity.layer.visible?
+        next false if entity.is_a?(Sketchup::ConstructionLine)
+        next false if entity.is_a?(Sketchup::ConstructionPoint)
+
+        true
+      end
+
+      if drawing_entities.empty?
+        UI.messagebox('No visible drawing objects were found to zoom to. The Fusion Workplane Grid was ignored.')
+        return
+      end
+
+      model.active_view.zoom(drawing_entities)
+    rescue => error
+      UI.messagebox("Could not zoom to drawing objects:\n#{error.message}")
+    end
+
     def self.add_grid(model)
       model.entities.to_a.each do |entity|
         next unless workspace_grid?(entity)
@@ -150,6 +172,7 @@ module N0JCG
       UI.menu('Tools').add_item(MENU_NAME) { prepare }
       UI.menu('Tools').add_item('Apply Fusion Grid Appearance') { apply_grid_appearance }
       UI.menu('Edit').add_item('Select All Except Fusion Grid') { select_all_except_grid }
+      UI.menu('Camera').add_item('Zoom Extents to Drawing (Ignore Fusion Grid)') { zoom_to_drawing }
       file_loaded(__FILE__)
     end
   end
