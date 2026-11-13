@@ -1,7 +1,7 @@
 # SketchUp DXF exporter with SketchUp tag names preserved as DXF layers.
 # Duplicate of the installed SketchUp to DXF/STL converter, isolated in its
 # own module so it can run beside the original plugin.
-# Version 1.4.2
+# Version 1.4.3
 # Targets SketchUp 2017 / Ruby 2.2.
 
 require 'sketchup.rb'
@@ -136,11 +136,9 @@ module N0JCG
     end
 
     def self.choose_mode(entities)
-      counts = geometry_counts(entities)
-      default = counts[:faces] == 0 && counts[:edges] > 0 ? WIRE_MODE : 'polyface mesh'
       result = UI.inputbox(
         ['Export geometry as:', 'Export origin:'],
-        [default, 'Model origin'],
+        ['polylines', 'Select point'],
         [MODES.join('|'), ORIGIN_CHOICES.join('|')],
         'DXF export options'
       )
